@@ -29,7 +29,7 @@ echo "$PW" | sudo "$7"/sbin/nginx
 
 # Emulate Network
 # TODO bandwidth still missing
+echo "$PW" | sudo tc qdisc del dev lo root
 echo "$PW" | sudo tc qdisc add dev lo root netem delay "$3"ms loss "$4"
-# echo "$PW" | sudo tc qdisc del dev lo root
 # Change keyboardMapping for xdotool
 setxkbmap us
