@@ -10,3 +10,9 @@ node_modules/
 
 # build
 dist/
+
+# env
+.env
+
+# results
+results.xlsx

@@ -30,7 +30,7 @@ exports.isValidProtocol = (raw, version) => {
     let isValid = true
 
     har.log.entries.every(entry => {
-        if (entry.response.httpVersion !== protocol) {
+        if (entry.response.httpVersion !== protocol && entry.response.httpVersion !== '') {
             isValid = false;
             return false
         }
