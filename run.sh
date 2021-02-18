@@ -69,6 +69,6 @@ echo $PW | sudo tc qdisc del dev lo root
 echo $PW | sudo /usr/local/nginx/sbin/nginx -s stop
 
 # Extraxt and insert average loadTime in /usr/local/nginx/sbin/extractor/results.xlsx
-node /usr/local/nginx/sbin/extractor/getOnLoad.js $2 $3 $4 $5
+node ./main.js $2 $3 $4 $5
 
 echo "Finished"
