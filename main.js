@@ -1,102 +1,76 @@
 const fs = require('fs')
-const glob = require('glob')
-const excelJS = require('exceljs');
+const { writeResult } = require('./excelExtension')
+const { isValidProtocol, getLoadTime } = require('./harExtension')
+const chokidar = require('chokidar')
+const execAwait = require('await-exec')
+const { exec } = require('child_process')
 
 // e.g. 3 100 0.1 1024 (version, latency, packet loss, bandwidth)
+// eslint-disable-next-line no-undef
 const [version, latency, loss, bandwidth] = process.argv.slice(2);
 
-const getTotalStartTime = pages => {
-    const startTimes = pages.map(page => new Date(page.startedDateTime))
-    return new Date(Math.min.apply(null, startTimes))
-}
+const padNumber = num => num.toString().padStart(2, '0')
 
-const getLoadTime = raw => {
-    // Source: https://stackoverflow.com/questions/30745931/how-to-get-total-web-page-response-time-from-a-har-file
-    const har = JSON.parse(raw)
-    const totalStartTime = getTotalStartTime(har.log.pages)
-    let loadTime = totalStartTime
-    har.log.entries.forEach(entry => {
-        const entryStartTime = new Date(entry.startedDateTime)
-        const entryLoadTime = entryStartTime.setMilliseconds(entryStartTime.getMilliseconds() + entry.time)
+async function run() {
+    let loadTimes = []
+    let currentSample = 0
 
-        if (entryLoadTime > loadTime)
-            loadTime = entryLoadTime
-    })
-    return loadTime - totalStartTime
-}
-
-const writeResult = async result => {
-    const workbook = new excelJS.Workbook()
-    const data = [latency, bandwidth, loss, version === '3' ? '' : result, version === '3' ? result : '']
-
-    if (!fs.existsSync('./results.xlsx')){
-        await createNewWorkbook(workbook)
+    console.log('Removing all HAR-Files ...')
+    try {
+        await execAwait('rm -r /home/mwallner/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs/*')
     }
+    catch(e) {}
 
-    await workbook.xlsx.readFile('./results.xlsx')
-    const sheet = workbook.getWorksheet('Results')
+    // Listen for new HAR-Files
+    const watcher = chokidar.watch('/home/mwallner/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs')
+    watcher.on('add', async path => {
+        const har = fs.readFileSync(path)
+        if (isValidProtocol(har, version)) {
+            // Disable dev-tools
+            await execAwait('xdotool key "ctrl+shift+e"')
 
-    const rows = sheet.getRows(1, sheet.actualRowCount)
-    let existingSettings = false
+            // Update loadTimes and sampleNumber
+            loadTimes.push(getLoadTime(har))
+            currentSample++
 
-    rows.forEach(row => {
-        const latencyTmp = row.getCell(1).value
-        const bandwidthTmp = row.getCell(2).value
-        const lossTmp = row.getCell(3).value
+            if (currentSample < 3) {
+                // Generate HAR-File of next sample
+                await execAwait(`./getHar.sh sample-${padNumber(currentSample)} ${windowId}`)
+            }
+            else {
+                // Stop listening for new HAR-Files
+                await watcher.close()
 
-        // If entry for same network setting already exists -> update
-        if (latencyTmp === latency && bandwidthTmp === bandwidth && lossTmp === loss) {
-            existingSettings = true
-            const cell = version === '3' ? 4 : 5
-            const pltTmp = row.getCell(cell).value
-            row.values = data
-            row.getCell(cell).value = pltTmp
+                // Close Browser
+                await execAwait('xdotool key "ctrl+q"')
+
+                // Calculate average loadTime
+                const avgLoadTime = loadTimes.reduce((acc, curr) => {
+                    return acc + curr
+                })/loadTimes.length
+
+                console.log('Writing Results ...')
+                await writeResult(avgLoadTime, latency, bandwidth, loss, version)
+
+                console.log('Finished')
+            }
+        }
+        else {
+            // Delete invalid HAR-File
+            fs.unlinkSync(path)
+
+            // Generate another HAR-File
+            await execAwait('xdotool key "F5"')
         }
     })
 
-    if (!existingSettings){
-        sheet.addRow(data);
-    }
+    // Start Firefox
+    console.log('Starting measurement ...')
+    exec('firefox-trunk &')
 
-    await workbook.xlsx.writeFile('./results.xlsx');
+    // windowId is used for xdotool
+    const windowId = (await execAwait('sleep 2; xdotool search nightly | tail -n1')).stdout
+    await execAwait(`./getHar.sh sample-${padNumber(currentSample)} ${windowId}`)
 }
 
-const createNewWorkbook = async workbook => {
-    console.log('Generating new File ...')
-
-    workbook.creator = 'Markus Wallner'
-    workbook.lastModifiedBy = 'Markus Wallner'
-    workbook.created = new Date()
-    workbook.modified = new Date()
-    workbook.properties.date1904 = true;
-
-    const sheet = workbook.addWorksheet('Results')
-    sheet.columns = [
-        {header: 'Latenz', key: 'latency', width: 30},
-        {header: 'Bandbreite', key: 'bandwidth', width: 30},
-        {header: 'Paketverlustrate', key: 'loss', width: 30},
-        {header: 'PLT - HTTP/2', key: 'h2', width: 30},
-        {header: 'PLT - HTTP/3', key: 'h3', width: 30}
-    ];
-
-    await workbook.xlsx.writeFile('./results.xlsx');
-}
-
-let loadTimes = []
-
-glob("/home/mwallner/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs/*.har", {}, (err, files) => {
-    files.forEach(file => {
-        loadTimes.push(getLoadTime(fs.readFileSync(file)))
-    })
-
-    if (!files.length > 0) {
-        console.log("No HAR-Files provided")
-        return
-    }
-
-    const avgLoadTime = loadTimes.reduce((acc, curr) => {
-        return acc + curr
-    })/loadTimes.length
-
-    writeResult(avgLoadTime)
-})
+run()

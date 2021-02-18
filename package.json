@@ -9,7 +9,12 @@
   "author": "Markus Wallner <mwallner.mmt-b2018@fh-salzburg.ac.at>",
   "license": "MIT",
   "dependencies": {
+    "await-exec": "^0.1.2",
+    "chokidar": "^3.5.1",
     "exceljs": "^4.2.0",
     "glob": "^7.1.6"
+  },
+  "devDependencies": {
+    "eslint": "^7.20.0"
   }
 }

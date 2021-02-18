@@ -45,6 +45,8 @@ echo $PW | sudo tc qdisc add dev lo root netem delay ${3}ms loss $4
 echo "clearing har-files ..."
 rm ~/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs/*
 
+setxkbmap us
+
 j=0
 while [ "$j" -le "4" ]; do
   num="00"
@@ -61,6 +63,8 @@ while [ "$j" -le "4" ]; do
 
   j=$((j + 1))
 done
+
+setxkbmap de
 
 # Disable tc
 echo $PW | sudo tc qdisc del dev lo root
