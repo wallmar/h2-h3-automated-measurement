@@ -1,7 +1,7 @@
 const fs = require('fs')
 const { config } = require('./config')
-const { writeResult } = require('./excelExtension')
-const { isValidProtocol, getLoadTime } = require('./harExtension')
+const { writeResult } = require('./src/excelExtension')
+const { isValidProtocol, getLoadTime } = require('./src/harExtension')
 const chokidar = require('chokidar')
 const execAwait = require('await-exec')
 const { exec } = require('child_process')
@@ -27,7 +27,7 @@ async function run() {
     const [version, latency, loss, bandwidth] = args.slice(2);
 
     console.log('Setting up Nginx and TC ...')
-    await execAwait(`./setup.sh ${config.password} ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
+    await execAwait(`./sh/setup.sh ${config.password} ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
 
     let loadTimes = []
     let currentSample = 0
@@ -54,7 +54,7 @@ async function run() {
 
             if (currentSample < 3) {
                 // Generate HAR-File of next sample
-                await execAwait(`./getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+                await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
             }
             else {
                 // Stop listening for new HAR-Files
@@ -62,7 +62,7 @@ async function run() {
 
                 // CleanupRoutine
                 console.log('Measuring complete. Cleaning up ...')
-                await execAwait(`./cleanup.sh ${config.password} ${config.nginxPath}`)
+                await execAwait(`./sh/cleanup.sh ${config.password} ${config.nginxPath}`)
 
                 // Calculate average loadTime
                 const avgLoadTime = loadTimes.reduce((acc, curr) => {
@@ -90,7 +90,7 @@ async function run() {
 
     // windowId is used for xdotool
     const windowId = (await execAwait('sleep 2; xdotool search nightly | tail -n1')).stdout
-    await execAwait(`./getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+    await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
 }
 
 run()

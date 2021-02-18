@@ -14,3 +14,7 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 e.g. for HTTP/3 with 100ms latency, 2 % loss and 1024 bandwidth
 
 ``node main.js 3 100 0.2 1024``
+
+This creates an entry in results.xlsx. If the file does not exist, it is created automatically. If a measurement is performed with the same parameters, the entry in results.xlsx is replaced.
+
+___Important:__ Before starting the measurement, close all instances of Firefox Nightly_
