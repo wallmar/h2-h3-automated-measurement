@@ -9,6 +9,7 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 ## Configuration
 * Rename ``.env.sample`` to ``.env`` and replace 'SECRET_SUDO_PASSWORD' with your password
 * In ``config.js`` replace the variable __harFilesPath__ with your Path to the Firefox-Trunk-HAR-Files. If you specified another Directory for your nginx-installation, also change __nginxPath__
+* TODO: config-Files für vhosts und nginx
 
 ## Usage
 e.g. for HTTP/3 with 100ms latency, 2 % loss and 1024 bandwidth
