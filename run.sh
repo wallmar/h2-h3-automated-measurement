@@ -57,7 +57,7 @@ while [ "$j" -le "4" ]; do
 
   echo "Measuring sample [$num of 5]"
 
-  /usr/local/nginx/sbin/getHar.sh https://sample-$num
+  ./getHar.sh https://sample-$num
 
   j=$((j + 1))
 done
