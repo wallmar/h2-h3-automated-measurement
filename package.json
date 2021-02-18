@@ -2,10 +2,7 @@
   "name": "h2-h3-automated-measurement",
   "version": "1.0.0",
   "description": "Frontend Assignment 2",
-  "main": "run.js",
-  "scripts": {
-    "start": "node run.js"
-  },
+  "main": "main.js",
   "author": "Markus Wallner <mwallner.mmt-b2018@fh-salzburg.ac.at>",
   "license": "MIT",
   "dependencies": {
