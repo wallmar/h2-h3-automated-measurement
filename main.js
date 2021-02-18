@@ -5,7 +5,25 @@ const excelJS = require('exceljs');
 // e.g. 3 100 0.1 1024 (version, latency, packet loss, bandwidth)
 const [version, latency, loss, bandwidth] = process.argv.slice(2);
 
-const getLoadTime = raw => JSON.parse(raw).log?.pages[0]?.pageTimings?.onLoad
+const getTotalStartTime = pages => {
+    const startTimes = pages.map(page => new Date(page.startedDateTime))
+    return new Date(Math.min.apply(null, startTimes))
+}
+
+const getLoadTime = raw => {
+    // Source: https://stackoverflow.com/questions/30745931/how-to-get-total-web-page-response-time-from-a-har-file
+    const har = JSON.parse(raw)
+    const totalStartTime = getTotalStartTime(har.log.pages)
+    let loadTime = totalStartTime
+    har.log.entries.forEach(entry => {
+        const entryStartTime = new Date(entry.startedDateTime)
+        const entryLoadTime = entryStartTime.setMilliseconds(entryStartTime.getMilliseconds() + entry.time)
+
+        if (entryLoadTime > loadTime)
+            loadTime = entryLoadTime
+    })
+    return loadTime - totalStartTime
+}
 
 const writeResult = async result => {
     const workbook = new excelJS.Workbook()
@@ -66,7 +84,7 @@ const createNewWorkbook = async workbook => {
 
 let loadTimes = []
 
-glob("/home/mwallner/har-files/*.har", {}, (err, files) => {
+glob("/home/mwallner/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs/*.har", {}, (err, files) => {
     files.forEach(file => {
         loadTimes.push(getLoadTime(fs.readFileSync(file)))
     })

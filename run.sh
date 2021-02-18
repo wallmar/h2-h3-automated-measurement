@@ -42,8 +42,8 @@ echo $PW | sudo /usr/local/nginx/sbin/nginx
 # TODO bandwidth still missing
 echo $PW | sudo tc qdisc add dev lo root netem delay ${3}ms loss $4
 
-echo "clearing /har-files ..."
-rm ~/har-files/*
+echo "clearing har-files ..."
+rm ~/.mozilla/firefox-trunk/xjj2st1m.default-nightly/har/logs/*
 
 j=0
 while [ "$j" -le "4" ]; do
