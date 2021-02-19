@@ -1,7 +1,7 @@
 const fs = require('fs')
 const { config } = require('./config')
-const { writeResult } = require('./src/excelExtension')
-const { isValidProtocol, getLoadTime } = require('./src/harExtension')
+const { writeResults } = require('./src/excelExtension')
+const { getValidRequestCount, getLoadTime } = require('./src/harExtension')
 const chokidar = require('chokidar')
 const execAwait = require('await-exec')
 const { exec } = require('child_process')
@@ -29,7 +29,7 @@ async function run() {
     console.log('Setting up Nginx and TC ...')
     await execAwait(`./sh/setup.sh ${config.password} ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
 
-    let loadTimes = []
+    let results = []
     let currentSample = 0
     const sleep = Math.max(2, latency * 5 / 1000)
 
@@ -40,16 +40,23 @@ async function run() {
     catch(e) {}
 
     // Listen for new HAR-Files
-    // TODO find out if ~ is supported
     const watcher = chokidar.watch(config.harFilesPath)
     watcher.on('add', async path => {
         const har = fs.readFileSync(path)
-        if (isValidProtocol(har, version)) {
+        const requestCount = getValidRequestCount(har, version)
+        if (requestCount) {
             // Disable dev-tools
             await execAwait('xdotool key "ctrl+shift+e"')
 
-            // Update loadTimes and sampleNumber
-            loadTimes.push(getLoadTime(har))
+            // Update results and sampleNumber
+            const sample = `sample-${padNumber(currentSample)}`
+            const loadTime = getLoadTime(har)
+            console.log(`${sample}: ${loadTime}ms`)
+            results.push({
+                loadTime,
+                requestCount,
+                sample
+            })
             currentSample++
 
             if (currentSample < 3) {
@@ -64,13 +71,8 @@ async function run() {
                 console.log('Measuring complete. Cleaning up ...')
                 await execAwait(`./sh/cleanup.sh ${config.password} ${config.nginxPath}`)
 
-                // Calculate average loadTime
-                const avgLoadTime = loadTimes.reduce((acc, curr) => {
-                    return acc + curr
-                })/loadTimes.length
-
                 console.log('Writing Results ...')
-                await writeResult(avgLoadTime, latency, bandwidth, loss, version)
+                await writeResults(results, latency, bandwidth, loss, version)
 
                 console.log('Finished')
             }

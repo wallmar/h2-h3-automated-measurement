@@ -10,6 +10,8 @@ const createNewWorkbook = async workbook => {
 
     const sheet = workbook.addWorksheet('Results')
     sheet.columns = [
+        {header: 'Website', key: 'sample', width: 30},
+        {header: 'Requests', key: 'request-count', width: 30},
         {header: 'Latenz', key: 'latency', width: 30},
         {header: 'Bandbreite', key: 'bandwidth', width: 30},
         {header: 'Paketverlustrate', key: 'loss', width: 30},
@@ -21,11 +23,11 @@ const createNewWorkbook = async workbook => {
 }
 
 /*
-Used to write results in Excel-file (results.xlsx) and is able to override results when network condition was already measured
+Used to write result in Excel-file (results.xlsx) and is able to override results when network condition was already measured
  */
-exports.writeResult = async (result, latency, bandwidth, loss, version) => {
+const writeResult = async (result, latency, bandwidth, loss, version) => {
     const workbook = new excelJS.Workbook()
-    const data = [latency, bandwidth, loss, version === '3' ? '' : result, version === '3' ? result : '']
+    const data = [result.sample, result.requestCount, latency, bandwidth, loss, version === '3' ? '' : result.loadTime, version === '3' ? result.loadTime : '']
 
     if (!fs.existsSync('./results.xlsx')){
         await createNewWorkbook(workbook)
@@ -38,14 +40,15 @@ exports.writeResult = async (result, latency, bandwidth, loss, version) => {
     let existingSettings = false
 
     rows.forEach(row => {
-        const latencyTmp = row.getCell(1).value
-        const bandwidthTmp = row.getCell(2).value
-        const lossTmp = row.getCell(3).value
+        const sampleTmp = row.getCell(1).value
+        const latencyTmp = row.getCell(3).value
+        const bandwidthTmp = row.getCell(4).value
+        const lossTmp = row.getCell(5).value
 
         // If entry for same network setting already exists -> update
-        if (latencyTmp === latency && bandwidthTmp === bandwidth && lossTmp === loss) {
+        if (sampleTmp === result.sample && latencyTmp === latency && bandwidthTmp === bandwidth && lossTmp === loss) {
             existingSettings = true
-            const cell = version === '3' ? 4 : 5
+            const cell = version === '3' ? 6 : 7
             const pltTmp = row.getCell(cell).value
             row.values = data
             row.getCell(cell).value = pltTmp
@@ -57,4 +60,12 @@ exports.writeResult = async (result, latency, bandwidth, loss, version) => {
     }
 
     await workbook.xlsx.writeFile('./results.xlsx');
+}
+
+exports.writeResults = async (results, latency, bandwidth, loss, version) => {
+    for (const result of results) {
+        // can not be async because read- and write-operations in same Excel-File
+        // eslint-disable-next-line no-await-in-loop
+        await writeResult(result, latency, bandwidth, loss, version)
+    }
 }

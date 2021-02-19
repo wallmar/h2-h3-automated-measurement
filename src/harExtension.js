@@ -22,19 +22,26 @@ exports.getLoadTime = raw => {
 }
 
 /*
-Checks if responses in given HAR-File have the correct version
+Checks if responses in given HAR-File have the correct version. Is also used to count number of requests
  */
-exports.isValidProtocol = (raw, version) => {
-    const protocol = version.toString() === '3' ? 'HTTP/3' : 'HTTP/2'
-    const har = JSON.parse(raw)
-    let isValid = true
+exports.getValidRequestCount = (raw, version) => {
+    let har = null
+    try {
+        har = JSON.parse(raw)
+    }
+    catch (e) {
+        return 0
+    }
 
-    har.log.entries.every(entry => {
+    const protocol = version.toString() === '3' ? 'HTTP/3' : 'HTTP/2'
+    let isValid = true
+    let requestCount = 0
+
+    har.log.entries.forEach(entry => {
         if (entry.response.httpVersion !== protocol && entry.response.httpVersion !== '') {
             isValid = false;
-            return false
         }
-        return true
+        requestCount++
     })
-    return isValid
+    return isValid ? requestCount : 0
 }
