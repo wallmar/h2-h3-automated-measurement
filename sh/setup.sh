@@ -15,7 +15,7 @@ while [ "$i" -le "$(($6-1))" ]; do
   fi
 
   # Creating VHosts for sample
-  sed "s/-00/-$num/g" "$7"/conf/sample.h"$2" > "$7"/conf/sites-available/sample-$num
+  sed "s/-00/-$num/g" vhosts/sample.h"$2" > "$7"/conf/sites-available/sample-$num
   ln -s "$7"/conf/sites-available/sample-$num "$7"/conf/sites-enabled
 
   i=$((i + 1))
