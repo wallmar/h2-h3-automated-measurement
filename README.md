@@ -12,9 +12,9 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 * TODO: config-Files für vhosts und nginx
 
 ## Usage
-e.g. for HTTP/3 with 100ms latency, 2 % loss and 1024 bandwidth
+e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 and HTTP/2)
 
-``node main.js 3 100 0.2 1024``
+``node main.js 100 0.02 1024``
 
 This creates an entry in results.xlsx. If the file does not exist, it is created automatically. If a measurement is performed with the same parameters, the entry in results.xlsx is replaced.
 

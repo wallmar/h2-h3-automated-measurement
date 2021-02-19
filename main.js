@@ -4,16 +4,16 @@ const { writeResults } = require('./src/excelExtension')
 const { getValidRequestCount, getLoadTime } = require('./src/harExtension')
 const chokidar = require('chokidar')
 const execAwait = require('await-exec')
+const { Mutex } = require('async-mutex')
 const { exec } = require('child_process')
 
 const padNumber = num => num.toString().padStart(2, '0')
+const getVersionName = version => `HTTP/${version}`
 
 const validArgs = args => {
-    if (args.length < 6)
+    if (args.length < 5)
         return false
-    if (!['2', '3'].includes(args[2]))
-        return false
-    return !(isNaN(args[2]) || isNaN(args[3]) || isNaN(args[4]) || isNaN(args[5]))
+    return !(isNaN(args[2]) || isNaN(args[3]) || isNaN(args[4]))
 }
 
 async function run() {
@@ -23,10 +23,22 @@ async function run() {
         console.log('Invalid arguments')
         return
     }
-    // e.g. 3 100 0.1 1024 (version, latency, loss, bandwidth)
-    const [version, latency, loss, bandwidth] = args.slice(2);
+    // e.g. 100 0.1 1024 (latency, loss, bandwidth)
+    const [latency, loss, bandwidth] = args.slice(2);
 
-    console.log('Setting up Nginx and TC ...')
+    // run for HTTP/2 and HTTP/3
+    const mutex = new Mutex()
+    for(const version of ['2', '3']) {
+        // eslint-disable-next-line no-await-in-loop
+        const release = await mutex.acquire()
+        // eslint-disable-next-line no-await-in-loop
+        await runForVersion(release, version, latency, loss, bandwidth)
+    }
+    console.log('Finished')
+}
+
+async function runForVersion(release, version, latency, loss, bandwidth) {
+    console.log(`Setting up Nginx and TC for ${getVersionName(version)}...`)
     await execAwait(`./sh/setup.sh ${config.password} ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
 
     let results = []
@@ -51,7 +63,7 @@ async function run() {
             // Update results and sampleNumber
             const sample = `sample-${padNumber(currentSample)}`
             const loadTime = getLoadTime(har)
-            console.log(`${sample}: ${loadTime}ms`)
+            console.log(`${getVersionName(version)} - ${sample}: ${loadTime}ms`)
             results.push({
                 loadTime,
                 requestCount,
@@ -68,13 +80,12 @@ async function run() {
                 await watcher.close()
 
                 // CleanupRoutine
-                console.log('Measuring complete. Cleaning up ...')
+                console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
                 await execAwait(`./sh/cleanup.sh ${config.password} ${config.nginxPath}`)
 
                 console.log('Writing Results ...')
                 await writeResults(results, latency, bandwidth, loss, version)
-
-                console.log('Finished')
+                release()
             }
         }
         else {
