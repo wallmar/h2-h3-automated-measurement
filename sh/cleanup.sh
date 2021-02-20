@@ -1,4 +1,4 @@
-# arguments: password, nginxPath -> e.g. 123456, /usr/local/nginx
+# arguments: nginxPath -> e.g. /usr/local/nginx
 
 # Close Browser
 xdotool key "ctrl+q"
@@ -7,8 +7,7 @@ xdotool key "ctrl+q"
 setxkbmap de
 
 # Disable tc
-PW=$1
-echo "$PW" | sudo tc qdisc del dev lo root
+sudo tc qdisc del dev lo root
 
 # Quit NGINX
-echo "$PW" | sudo "$2"/sbin/nginx -s stop
+sudo "$1"/sbin/nginx -s stop

@@ -9,7 +9,6 @@
     "async-mutex": "^0.3.0",
     "await-exec": "^0.1.2",
     "chokidar": "^3.5.1",
-    "dotenv": "^8.2.0",
     "exceljs": "^4.2.0",
     "glob": "^7.1.6"
   },

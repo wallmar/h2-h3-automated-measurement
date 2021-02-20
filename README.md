@@ -7,7 +7,6 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
   __./auto/configure --with-debug --with-http_v3_module --with-cc-opt="-I../boringssl/include" --with-ld-opt="-L../boringssl/build/ssl -L../boringssl/build/crypto" --with-http_v2_module__ <br/><br/>(Please note that nginx requires boringssl)
 
 ## Configuration
-* Rename ``.env.sample`` to ``.env`` and replace 'SECRET_SUDO_PASSWORD' with your password
 * In ``config.js`` replace the variable __harFilesPath__ with your Path to the Firefox-Trunk-HAR-Files. If you specified another Directory for your nginx-installation, also change __nginxPath__
 * TODO: config-Files für vhosts und nginx
 

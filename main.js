@@ -39,7 +39,7 @@ async function run() {
 
 async function runForVersion(release, version, latency, loss, bandwidth) {
     console.log(`Setting up Nginx and TC for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${config.password} ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
+    await execAwait(`./sh/setup.sh ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
 
     let results = []
     let currentSample = 0
@@ -53,48 +53,56 @@ async function runForVersion(release, version, latency, loss, bandwidth) {
 
     // Listen for new HAR-Files
     const watcher = chokidar.watch(config.harFilesPath)
-    watcher.on('add', async path => {
-        const har = fs.readFileSync(path)
-        const requestCount = getValidRequestCount(har, version)
-        if (requestCount) {
-            // Disable dev-tools
-            await execAwait('xdotool key "ctrl+shift+e"')
+    watcher.on('add', path => {
+        let harRaw = ""
+        const readStream = fs.createReadStream(path)
 
-            // Update results and sampleNumber
-            const sample = `sample-${padNumber(currentSample)}`
-            const loadTime = getLoadTime(har)
-            console.log(`${getVersionName(version)} - ${sample}: ${loadTime}ms`)
-            results.push({
-                loadTime,
-                requestCount,
-                sample
-            })
-            currentSample++
+        readStream.on('data', chunk => {
+            harRaw += chunk.toString('utf-8')
+        })
 
-            if (currentSample < 3) {
-                // Generate HAR-File of next sample
-                await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+        readStream.on('end', async () => {
+            const requestCount = getValidRequestCount(harRaw, version)
+            if (requestCount) {
+                // Disable dev-tools
+                await execAwait('xdotool key "ctrl+shift+e"')
+
+                // Update results and sampleNumber
+                const sample = `sample-${padNumber(currentSample)}`
+                const loadTime = getLoadTime(harRaw)
+                console.log(`${getVersionName(version)} - ${sample}: ${loadTime}ms`)
+                results.push({
+                    loadTime,
+                    requestCount,
+                    sample
+                })
+                currentSample++
+
+                if (currentSample < 3) {
+                    // Generate HAR-File of next sample
+                    await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+                }
+                else {
+                    // Stop listening for new HAR-Files
+                    await watcher.close()
+
+                    // CleanupRoutine
+                    console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
+                    await execAwait(`./sh/cleanup.sh ${config.nginxPath}`)
+
+                    console.log('Writing Results ...')
+                    await writeResults(results, latency, bandwidth, loss, version)
+                    release()
+                }
             }
             else {
-                // Stop listening for new HAR-Files
-                await watcher.close()
+                // Delete invalid HAR-File
+                fs.unlinkSync(path)
 
-                // CleanupRoutine
-                console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
-                await execAwait(`./sh/cleanup.sh ${config.password} ${config.nginxPath}`)
-
-                console.log('Writing Results ...')
-                await writeResults(results, latency, bandwidth, loss, version)
-                release()
+                // Generate another HAR-File
+                await execAwait('xdotool key "F5"')
             }
-        }
-        else {
-            // Delete invalid HAR-File
-            fs.unlinkSync(path)
-
-            // Generate another HAR-File
-            await execAwait('xdotool key "F5"')
-        }
+        })
     })
 
     // Start Firefox
