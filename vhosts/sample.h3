@@ -2,9 +2,10 @@ server {
 		server_name sample-00;
 		listen 443 http3;
 		listen 443 ssl;
-		ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
-		ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+		ssl_certificate     /etc/ssl/self-signed/h2-h3.crt;
+		ssl_certificate_key /etc/ssl/self-signed/h2-h3.key;
 		ssl_protocols       TLSv1.3;
+		ssl_early_data 			on;
 
 		location / {
 				root samples/sample-00;
