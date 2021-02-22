@@ -9,11 +9,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 let url = URL.createObjectURL(blob);
                 const date = new Date()
                 const formattedDate = `${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`
+                const hostName = new URL(tab.url).host
 
-                chrome.downloads.download({
-                    filename: `har/${new URL(tab.url).host}-${formattedDate}`,
-                    url
-                });
+                if (hostName.startsWith('sample-')) {
+                    chrome.downloads.download({
+                        filename: `har/${hostName}-${formattedDate}`,
+                        url
+                    });
+                }
             })
         }, 1000);
     }
