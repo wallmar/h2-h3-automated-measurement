@@ -4,8 +4,11 @@ server {
 		listen 443 ssl;
 		ssl_certificate     /etc/ssl/self-signed/h2-h3.crt;
 		ssl_certificate_key /etc/ssl/self-signed/h2-h3.key;
-		ssl_protocols       TLSv1.3;
-		ssl_early_data 			on;
+		ssl_protocols TLSv1.3;
+		ssl_early_data on;
+		http3_max_field_size 80000;
+        http3_max_table_capacity 50;
+        http3_max_blocked_streams 30;
 
 		location / {
 				root samples/sample-00;
