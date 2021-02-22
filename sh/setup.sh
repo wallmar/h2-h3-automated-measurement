@@ -4,6 +4,11 @@
 rm "$6"/conf/sites-available/*
 rm "$6"/conf/sites-enabled/*
 
+# update certificate and key
+sudo mkdir -p /etc/ssl/self-signed
+sudo cp ssl/h2-h3.crt /etc/ssl/self-signed
+sudo cp ssl/h2-h3.key /etc/ssl/self-signed
+
 # update /etc/hosts
 if ! sudo grep -q "sample-00" /etc/hosts; then
   i=0
