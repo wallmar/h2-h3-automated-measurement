@@ -1,8 +1,5 @@
 # arguments: nginxPath -> e.g. /usr/local/nginx
 
-# Close Browser
-xdotool key "ctrl+q"
-
 # Revert change of keyboardMapping
 setxkbmap de
 

@@ -5,7 +5,6 @@ const { getValidRequestCount, getLoadTime } = require('./src/harExtension')
 const chokidar = require('chokidar')
 const execAwait = require('await-exec')
 const { Mutex } = require('async-mutex')
-const { exec } = require('child_process')
 
 const padNumber = num => num.toString().padStart(2, '0')
 const getVersionName = version => `HTTP/${version}`
@@ -27,34 +26,24 @@ async function run() {
     const [latency, loss, bandwidth] = args.slice(2);
 
     // run for HTTP/2 and HTTP/3
-    const mutex = new Mutex()
     for(const version of ['2', '3']) {
         // eslint-disable-next-line no-await-in-loop
-        const release = await mutex.acquire()
-        // eslint-disable-next-line no-await-in-loop
-        await runForVersion(release, version, latency, loss, bandwidth)
+        await runForVersion(version, latency, loss, bandwidth)
     }
     console.log('Finished')
 }
 
-async function runForVersion(release, version, latency, loss, bandwidth) {
-    console.log(`Setting up Nginx and TC for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
-
-    let results = []
-    let currentSample = 0
-    const sleep = Math.max(2, latency * 5 / 1000)
-
-    console.log('Removing all HAR-Files ...')
-    try {
-        await execAwait(`rm -r ${config.harFilesPath}/*`)
+async function runForVersion(version, latency, loss, bandwidth) {
+    const performMeasurementFor = async(currentSample, ver) => {
+        await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${padNumber(ver)}`)
     }
-    catch(e) {}
+    const handleHarAdded = path => {
+        // ignore .crdownload
+        if (path.endsWith('.crdownload')) {
+            return
+        }
 
-    // Listen for new HAR-Files
-    const watcher = chokidar.watch(config.harFilesPath)
-    watcher.on('add', path => {
-        let harRaw = ""
+        let harRaw = ''
         const readStream = fs.createReadStream(path)
 
         readStream.on('data', chunk => {
@@ -62,11 +51,11 @@ async function runForVersion(release, version, latency, loss, bandwidth) {
         })
 
         readStream.on('end', async () => {
+            // Close Chromium
+            await execAwait('xdotool key "ctrl+shift+w"')
+
             const requestCount = getValidRequestCount(harRaw, version)
             if (requestCount) {
-                // Disable dev-tools
-                await execAwait('xdotool key "ctrl+shift+e"')
-
                 // Update results and sampleNumber
                 const sample = `sample-${padNumber(currentSample)}`
                 const loadTime = getLoadTime(harRaw)
@@ -80,7 +69,7 @@ async function runForVersion(release, version, latency, loss, bandwidth) {
 
                 if (currentSample < 3) {
                     // Generate HAR-File of next sample
-                    await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+                    await performMeasurementFor(currentSample, version)
                 }
                 else {
                     // Stop listening for new HAR-Files
@@ -92,6 +81,8 @@ async function runForVersion(release, version, latency, loss, bandwidth) {
 
                     console.log('Writing Results ...')
                     await writeResults(results, latency, bandwidth, loss, version)
+
+                    // Release Mutex
                     release()
                 }
             }
@@ -99,19 +90,34 @@ async function runForVersion(release, version, latency, loss, bandwidth) {
                 // Delete invalid HAR-File
                 fs.unlinkSync(path)
 
-                // Generate another HAR-File
-                await execAwait('xdotool key "F5"')
+                // Generate HAR-File of same sample
+                await performMeasurementFor(currentSample, version)
             }
         })
-    })
+    }
+    const mutex = new Mutex()
+    const release = await mutex.acquire()
+
+    console.log(`Setting up Nginx and TC for ${getVersionName(version)}...`)
+    await execAwait(`./sh/setup.sh ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
+
+    let results = []
+    let currentSample = 0
+
+    console.log('Removing all HAR-Files ...')
+    try {
+        await execAwait(`rm -r ${config.harFilesPath}/*`)
+    }
+    catch(e) {}
+
+    // Listen for new HAR-Files
+    const watcher = chokidar.watch(config.harFilesPath)
+    watcher.on('add', handleHarAdded)
 
     // Start Firefox
     console.log('Starting measurement ...')
-    exec('firefox-trunk &')
-
-    // windowId is used for xdotool
-    const windowId = (await execAwait('sleep 2; xdotool search nightly | tail -n1')).stdout
-    await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${sleep} ${windowId}`)
+    await performMeasurementFor(currentSample, version)
+    await mutex.acquire()
 }
 
 run()

@@ -33,7 +33,7 @@ exports.getValidRequestCount = (raw, version) => {
         return 0
     }
 
-    const protocol = version.toString() === '3' ? 'HTTP/3' : 'HTTP/2'
+    const protocol = version.toString() === '3' ? 'h3-29' : 'http/2.0'
     let isValid = true
     let requestCount = 0
 
