@@ -4,7 +4,7 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 ## Dependencies
 * Latest version of Chromium.
 * Manually installed Nginx from quic-branch. Refer to https://hg.nginx.org/nginx-quic/file/quic/README for installation. But use this command for configuration (this also enables http2):<br/><br/>
-  __./auto/configure --with-debug --with-http_v3_module --with-cc-opt="-I../boringssl/include" --with-ld-opt="-L../boringssl/build/ssl -L../boringssl/build/crypto" --with-http_v2_module__ <br/><br/>(Please note that nginx requires boringssl)
+  __./auto/configure --with-debug --with-http_v3_module --with-cc-opt="-I../boringssl/include" --with-ld-opt="-L../boringssl/build/ssl -L../boringssl/build/crypto" --with-http_v2_module__ <br/><br/>_Please note that nginx requires boringssl_
 
 ## Configuration
 * In ``config.js`` replace the variable __downloadsPath__ with your Downloads-Location for Chromium. If you specified another Directory for your nginx-installation, also change __nginxPath__
@@ -13,6 +13,10 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
   2. Go to __chrome://extensions/__
   3. Enable Developer Mode
   4. Click at __"Load unpacked"__ and select the ``/chrome-extension``-folder from this repository
+* Generate a self-signed certificate and import the authority to Chromium [see Answer at StackOverflow](https://stackoverflow.com/a/60516812)
+  * The .crt-file must be ``/etc/ssl/self-signed/h2-h3.crt``
+  * The .key-file for the server (not CA) must be ``/etc/ssl/self-signed/h2-h3.key``
+</br></br>_Please note that you have to specify all hosts as DNS.x in the .ext-File_. [example with 50 hosts](./nginx-config/example.ext)
 
 ## Usage
 e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 and HTTP/2)
