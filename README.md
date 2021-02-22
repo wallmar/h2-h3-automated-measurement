@@ -2,7 +2,8 @@
 Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwallner.mmt-b2018@fh-salzburg.ac.at>
 
 ## Dependencies
-* Latest version of Chromium.
+* Ubuntu (worked with Ubuntu 20.04.2 LTS)
+* Chromium (worked with 88.0.4324.182)
 * Manually installed Nginx from quic-branch. Refer to https://hg.nginx.org/nginx-quic/file/quic/README for installation. But use this command for configuration (this also enables http2):<br/><br/>
   __./auto/configure --with-debug --with-http_v3_module --with-cc-opt="-I../boringssl/include" --with-ld-opt="-L../boringssl/build/ssl -L../boringssl/build/crypto" --with-http_v2_module__ <br/><br/>_Please note that nginx requires boringssl_
 
