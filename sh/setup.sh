@@ -4,6 +4,9 @@
 rm "$6"/conf/sites-available/*
 rm "$6"/conf/sites-enabled/*
 
+# replacing nginx-conf
+cp nginx-config/nginx.conf "$6"/conf
+
 i=0
 while [ "$i" -le "$(($5-1))" ]; do
   num="00"
@@ -14,21 +17,21 @@ while [ "$i" -le "$(($5-1))" ]; do
       num="0${i}"
   fi
 
-  # Creating VHosts for sample
-  sed "s/-00/-$num/g" vhosts/sample.h"$1" > "$6"/conf/sites-available/sample-$num
+  # creating VHosts for sample
+  sed "s/-00/-$num/g" nginx-config/sample.h"$1" > "$6"/conf/sites-available/sample-$num
   ln -s "$6"/conf/sites-available/sample-$num "$6"/conf/sites-enabled
 
   i=$((i + 1))
 done
 
-# Start NGINX
+# starting Nginx
 sudo "$6"/sbin/nginx -s stop
 sleep 3
 sudo "$6"/sbin/nginx
 
-# Emulate Network
-# TODO bandwidth still missing
+# emulating Network
 sudo tc qdisc del dev lo root
 sudo tc qdisc add dev lo root netem delay "$2"ms loss "$3"
-# Change keyboardMapping for xdotool
+
+# changing keyboardMapping for xdotool
 setxkbmap us
