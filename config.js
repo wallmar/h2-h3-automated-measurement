@@ -1,5 +1,5 @@
 exports.config = {
-    harFilesPath: '/home/mwallner/Downloads/har',
+    downloadsPath: '/home/mwallner/Downloads',
     nginxPath: '/usr/local/nginx',
     samplesCount: 50
 };

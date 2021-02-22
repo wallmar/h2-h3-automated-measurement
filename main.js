@@ -106,12 +106,12 @@ async function runForVersion(version, latency, loss, bandwidth) {
 
     console.log('Removing all HAR-Files ...')
     try {
-        await execAwait(`rm -r ${config.harFilesPath}/*`)
+        await execAwait(`rm -r ${config.downloadsPath}/har/*`)
     }
     catch(e) {}
 
     // Listen for new HAR-Files
-    const watcher = chokidar.watch(config.harFilesPath)
+    const watcher = chokidar.watch(`${config.downloadsPath}/har`)
     watcher.on('add', handleHarAdded)
 
     // Start Firefox
