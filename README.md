@@ -13,7 +13,6 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
   2. Go to __chrome://extensions/__
   3. Enable Developer Mode
   4. Click at __"Load unpacked"__ and select the ``/chrome-extension``-folder from this repository
-* TODO: config-Files für vhosts und nginx
 
 ## Usage
 e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 and HTTP/2)

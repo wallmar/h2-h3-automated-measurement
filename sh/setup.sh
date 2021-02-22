@@ -4,7 +4,25 @@
 rm "$6"/conf/sites-available/*
 rm "$6"/conf/sites-enabled/*
 
-# replacing nginx-conf
+# update /etc/hosts
+if ! sudo grep -q "sample-00" /etc/hosts; then
+  i=0
+  while [ "$i" -le "$(($5-1))" ]; do
+    num="00"
+    if [ "$i" -gt "9" ]
+    then
+        num="${i}"
+    else
+        num="0${i}"
+    fi
+
+    printf "127.0.0.1\tsample-%s\n" "$num"| sudo tee --append /etc/hosts
+
+    i=$((i + 1))
+  done
+fi
+
+# replace nginx-conf
 cp nginx-config/nginx.conf "$6"/conf
 
 i=0
@@ -17,21 +35,21 @@ while [ "$i" -le "$(($5-1))" ]; do
       num="0${i}"
   fi
 
-  # creating VHosts for sample
+  # create VHosts for sample
   sed "s/-00/-$num/g" nginx-config/sample.h"$1" > "$6"/conf/sites-available/sample-$num
   ln -s "$6"/conf/sites-available/sample-$num "$6"/conf/sites-enabled
 
   i=$((i + 1))
 done
 
-# starting Nginx
+# start Nginx
 sudo "$6"/sbin/nginx -s stop
 sleep 3
 sudo "$6"/sbin/nginx
 
-# emulating Network
+# emulate network
 sudo tc qdisc del dev lo root
 sudo tc qdisc add dev lo root netem delay "$2"ms loss "$3"
 
-# changing keyboardMapping for xdotool
+# change keyboardMapping for xdotool
 setxkbmap us
