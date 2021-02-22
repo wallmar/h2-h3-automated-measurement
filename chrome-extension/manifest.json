@@ -1,0 +1,9 @@
+{
+  "name": "HAR Saver",
+  "description": "Automatically saves the HAR-File",
+  "version": "1.0",
+  "manifest_version": 3,
+  "devtools_page": "devtools.html",
+  "permissions": ["downloads", "tabs"],
+  "action": {}
+}
