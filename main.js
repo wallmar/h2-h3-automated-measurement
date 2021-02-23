@@ -55,6 +55,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
 
         readStream.on('end', async () => {
             // Close Chromium
+            await execAwait('sleep 0.5')
             await execAwait('xdotool key "ctrl+shift+w"')
 
             const requestCount = getValidRequestCount(harRaw, version)
