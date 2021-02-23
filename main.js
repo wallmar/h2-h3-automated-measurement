@@ -39,9 +39,12 @@ async function runForVersion(version, latency, loss, bandwidth) {
     }
     const handleHarAdded = path => {
         // ignore .crdownload
-        if (path.endsWith('.crdownload')) {
+        if (path.endsWith('.crdownload'))
             return
-        }
+
+        // sometimes 2 identical HAR-Files are saved
+        if (path.includes('('))
+            return
 
         let harRaw = ''
         const readStream = fs.createReadStream(path)
@@ -67,7 +70,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
                 })
                 currentSample++
 
-                if (currentSample < 3) {
+                if (currentSample < config.samplesCount) {
                     // Generate HAR-File of next sample
                     await performMeasurementFor(currentSample, version)
                 }
