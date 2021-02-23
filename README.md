@@ -17,6 +17,7 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 * Import the Authority of the self-signed certificate to Chromium:
   1. Go to Settings > Privacy and Security > Security > Manage certificates > Authorities > Import
   2. Select  [CA.pem](./ssl/CA.pem)
+* Add the websites to be measured in ``/samples`` in your nginx-path, _default: ``/usr/local/nginx/samples``_
 
 ## Usage
 e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 and HTTP/2)
