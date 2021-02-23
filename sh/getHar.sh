@@ -6,9 +6,9 @@ fi
 
 # start Chromium
 if [ "$2" = '02' ]; then
-  chromium --auto-open-devtools-for-tabs &
+  chromium --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null &
 else
-  chromium --enable-quic --quic-version=h3-29 --origin-to-force-quic-on="$1":443 --auto-open-devtools-for-tabs &
+  chromium --enable-quic --quic-version=h3-29 --origin-to-force-quic-on="$1":443 --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null &
 fi
 sleep 1
 
