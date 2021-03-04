@@ -1,5 +1,9 @@
 # arguments: version, latency, loss, bandwidth, samplesCount, nginxPath -> e.g. 3 100 0.1 1024 50 /usr/local/nginx
 
+# create /sites-available and /sites-enabled
+sudo mkdir -p "$6"/conf/sites-available
+sudo mkdir -p "$6"/conf/sites-enabled
+
 # clearing /sites-available and /sites-enabled ...
 rm "$6"/conf/sites-available/*
 rm "$6"/conf/sites-enabled/*
@@ -28,7 +32,7 @@ if ! sudo grep -q "sample-00" /etc/hosts; then
 fi
 
 # replace nginx-conf
-cp nginx-config/nginx.conf "$6"/conf
+sudo cp nginx-config/nginx.conf "$6"/conf
 
 i=0
 while [ "$i" -le "$(($5-1))" ]; do
@@ -41,8 +45,8 @@ while [ "$i" -le "$(($5-1))" ]; do
   fi
 
   # create VHosts for sample
-  sed "s/-00/-$num/g" nginx-config/sample.h"$1" > "$6"/conf/sites-available/sample-$num
-  ln -s "$6"/conf/sites-available/sample-$num "$6"/conf/sites-enabled
+  sed "s/-00/-$num/g" nginx-config/sample.h"$1"| sudo tee "$6"/conf/sites-available/sample-$num
+  sudo ln -s "$6"/conf/sites-available/sample-$num "$6"/conf/sites-enabled
 
   i=$((i + 1))
 done
