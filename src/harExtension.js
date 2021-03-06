@@ -1,5 +1,5 @@
-const getTotalStartTime = pages => {
-    const startTimes = pages.map(page => new Date(page.startedDateTime))
+const getTotalStartTime = entries => {
+    const startTimes = entries.map(entry => new Date(entry.startedDateTime))
     return new Date(Math.min.apply(null, startTimes))
 }
 
@@ -9,7 +9,7 @@ Extracts the total loadTime of given HAR-File by calculating the timestamp betwe
 exports.getLoadTime = raw => {
     // Source: https://stackoverflow.com/questions/30745931/how-to-get-total-web-page-response-time-from-a-har-file
     const har = JSON.parse(raw)
-    const totalStartTime = getTotalStartTime(har.log.pages)
+    const totalStartTime = getTotalStartTime(har.log.entries)
     let loadTime = totalStartTime
     har.log.entries.forEach(entry => {
         const entryStartTime = new Date(entry.startedDateTime)
