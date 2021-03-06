@@ -22,7 +22,7 @@ async function run() {
         console.log('Invalid arguments')
         return
     }
-    // e.g. 100 0.1 1024 (latency, loss, bandwidth)
+    // e.g. 100 2 1024 (latency, loss, bandwidth)
     const [latency, loss, bandwidth] = args.slice(2);
 
     // run for HTTP/2 and HTTP/3

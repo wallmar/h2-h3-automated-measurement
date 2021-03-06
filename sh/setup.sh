@@ -1,4 +1,4 @@
-# arguments: version, latency, loss, bandwidth, samplesCount, nginxPath -> e.g. 3 100 0.1 1024 50 /usr/local/nginx
+# arguments: version, latency, loss, bandwidth, samplesCount, nginxPath -> e.g. 3 100 2 1024 50 /usr/local/nginx
 
 # create /sites-available and /sites-enabled
 sudo mkdir -p "$6"/conf/sites-available
@@ -58,7 +58,7 @@ sudo "$6"/sbin/nginx
 
 # emulate network
 sudo tc qdisc del dev lo root
-sudo tc qdisc add dev lo root netem delay "$2"ms loss "$3"
+sudo tc qdisc add dev lo root netem delay "$2"ms loss "$3"%
 
 # change keyboardMapping for xdotool
 setxkbmap us
