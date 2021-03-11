@@ -1,5 +1,5 @@
 exports.config = {
     downloadsPath: '/home/mwallner/Downloads',
-    samplesCount: 5,
+    samplesCount: 50,
     samplesDomain: 'mmtsample.hopto.org'
 };
