@@ -81,7 +81,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
 
                     // CleanupRoutine
                     console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
-                    await execAwait(`./sh/cleanup.sh`)
+                    await execAwait(`./sh/cleanup.sh ${config.networkInterface}`)
 
                     console.log('Writing Results ...')
                     await writeResults(results, latency, bandwidth, loss, version)
@@ -103,7 +103,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
     const release = await mutex.acquire()
 
     console.log(`Setting up measurement for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth}`)
+    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth} ${config.networkInterface}`)
 
     let results = []
     let currentSample = 0

@@ -1,4 +1,4 @@
-# arguments: domain, sample, version -> mmtsample.hopto.org sample-00, 02
+# arguments: domain, sample, version -> e.g. mmtsample.hopto.org sample-00, 02
 if [[ $# -le 1 ]]; then
   echo "too few arguments"
   exit 1
