@@ -35,7 +35,7 @@ async function run() {
 
 async function runForVersion(version, latency, loss, bandwidth) {
     const performMeasurementFor = async(currentSample, ver) => {
-        await execAwait(`./sh/getHar.sh sample-${padNumber(currentSample)} ${padNumber(ver)}`)
+        await execAwait(`./sh/getHar.sh ${config.samplesDomain} sample-${padNumber(currentSample)} ${padNumber(ver)}`)
     }
     const handleHarAdded = path => {
         // ignore .crdownload
@@ -81,7 +81,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
 
                     // CleanupRoutine
                     console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
-                    await execAwait(`./sh/cleanup.sh ${config.nginxPath}`)
+                    await execAwait(`./sh/cleanup.sh`)
 
                     console.log('Writing Results ...')
                     await writeResults(results, latency, bandwidth, loss, version)
@@ -102,8 +102,8 @@ async function runForVersion(version, latency, loss, bandwidth) {
     const mutex = new Mutex()
     const release = await mutex.acquire()
 
-    console.log(`Setting up Nginx and TC for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${version} ${latency} ${loss} ${bandwidth} ${config.samplesCount} ${config.nginxPath}`)
+    console.log(`Setting up measurement for ${getVersionName(version)}...`)
+    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth}`)
 
     let results = []
     let currentSample = 0
@@ -118,7 +118,6 @@ async function runForVersion(version, latency, loss, bandwidth) {
     const watcher = chokidar.watch(`${config.downloadsPath}/har`)
     watcher.on('add', handleHarAdded)
 
-    // Start Firefox
     console.log('Starting measurement ...')
     await performMeasurementFor(currentSample, version)
     await mutex.acquire()

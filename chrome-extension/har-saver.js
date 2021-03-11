@@ -9,12 +9,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
                 let blob = new Blob([JSON.stringify(harObj)])
                 let url = URL.createObjectURL(blob);
-                const hostName = new URL(tab.url).host
+                // eslint-disable-next-line require-unicode-regexp
+                const path = new URL(tab.url).pathname.replace(/\/+$/, '')
 
-                if (hostName.startsWith('sample-')) {
+                if (tab.url.includes('sample-')) {
                     // eslint-disable-next-line no-undef
                     chrome.downloads.download({
-                        filename: `har/${hostName}`,
+                        filename: `har/${path}`,
                         url
                     });
                 }
