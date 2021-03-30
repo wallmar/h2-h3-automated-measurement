@@ -25,9 +25,9 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 * Execute ``npm i``
 
 ## Usage
-e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 and HTTP/2)
+e.g. for with 100ms latency and 2 % loss (performed for HTTP/3 and HTTP/2)
 
-``node main.js 100 2 1024``
+``node main.js 100 2``
 
 This creates entries in results.xlsx. If the file does not exist, it is created automatically. If a measurement is performed with the same parameters, the according entries in results.xlsx is replaced.
 

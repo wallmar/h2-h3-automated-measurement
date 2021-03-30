@@ -10,9 +10,9 @@ const padNumber = num => num.toString().padStart(2, '0')
 const getVersionName = version => `HTTP/${version}`
 
 const validArgs = args => {
-    if (args.length < 5)
+    if (args.length < 4)
         return false
-    return !(isNaN(args[2]) || isNaN(args[3]) || isNaN(args[4]))
+    return !(isNaN(args[2]) || isNaN(args[3]))
 }
 
 async function run() {
@@ -22,18 +22,18 @@ async function run() {
         console.log('Invalid arguments')
         return
     }
-    // e.g. 100 2 1024 (latency, loss, bandwidth)
-    const [latency, loss, bandwidth] = args.slice(2);
+    // e.g. 100 2 (latency, loss)
+    const [latency, loss] = args.slice(2);
 
     // run for HTTP/2 and HTTP/3
     for(const version of ['2', '3']) {
         // eslint-disable-next-line no-await-in-loop
-        await runForVersion(version, latency, loss, bandwidth)
+        await runForVersion(version, latency, loss)
     }
     console.log('Finished')
 }
 
-async function runForVersion(version, latency, loss, bandwidth) {
+async function runForVersion(version, latency, loss) {
     const performMeasurementFor = async(currentSample, ver) => {
         await execAwait(`./sh/getHar.sh ${config.samplesDomain} sample-${padNumber(currentSample)} ${padNumber(ver)}`)
     }
@@ -81,10 +81,10 @@ async function runForVersion(version, latency, loss, bandwidth) {
 
                     // CleanupRoutine
                     console.log(`Measuring for ${getVersionName(version)} complete. Cleaning up ...`)
-                    await execAwait(`./sh/cleanup.sh ${config.networkInterface}`)
+                    await execAwait(`./sh/cleanup.sh ${config.networkInterface} ${config.samplesDomain} ${config.serverRootPassword} ${config.serverNetworkInterface}`)
 
                     console.log('Writing Results ...')
-                    await writeResults(results, latency, bandwidth, loss, version)
+                    await writeResults(results, latency, loss, version)
 
                     // Release Mutex
                     release()
@@ -103,7 +103,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
     const release = await mutex.acquire()
 
     console.log(`Setting up measurement for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth} ${config.networkInterface} ${config.samplesDomain} ${config.serverRootPassword} ${config.serverNetworkInterface}`)
+    await execAwait(`./sh/setup.sh ${latency} ${loss} ${config.networkInterface} ${config.samplesDomain} ${config.serverRootPassword} ${config.serverNetworkInterface}`)
 
     let results = []
     let currentSample = 0
