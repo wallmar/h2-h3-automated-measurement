@@ -103,7 +103,7 @@ async function runForVersion(version, latency, loss, bandwidth) {
     const release = await mutex.acquire()
 
     console.log(`Setting up measurement for ${getVersionName(version)}...`)
-    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth} ${config.networkInterface}`)
+    await execAwait(`./sh/setup.sh ${latency} ${loss} ${bandwidth} ${config.networkInterface} ${config.samplesDomain} ${config.serverRootPassword} ${config.serverNetworkInterface}`)
 
     let results = []
     let currentSample = 0

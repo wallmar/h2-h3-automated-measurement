@@ -7,9 +7,16 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
 * xdotool
 * npm
 * node
+* sshpass
 
 ## Configuration
-* In ``config.js`` replace the variable __downloadsPath__ with your Downloads-Location for Chromium.
+* In ``config.js`` 
+  1. set the variable __downloadsPath__ to your Downloads-Location for Chromium.
+  2. set the variable __networkInterface__ to your network interface (ip addr show)
+  3. set the variable __samplesCount__ to the total count of samples provided by the webserver
+  3. set the variable __samplesDomain__ to the domain of the webserver
+  4. set the variable __serverNetworkInterface__ to the network interface of the webserver (ip addr show)
+  5. set the variable __serverRootPassword__ to the root password of the webserver (webserver must have enabled ssh and permit login as root - ___Please permit login as root only for the IP-Address of the client for security reasons___)
 * Add the Chrome Extension in ``/chrome-extension`` to Chromium (this enables auto-download of HAR):
   1. Open Chromium
   2. Go to __chrome://extensions/__
@@ -24,4 +31,4 @@ e.g. for with 100ms latency, 2 % loss and 1024 bandwidth (performed for HTTP/3 a
 
 This creates entries in results.xlsx. If the file does not exist, it is created automatically. If a measurement is performed with the same parameters, the according entries in results.xlsx is replaced.
 
-___Important:__ Before starting the measurement, close all instances of Chromium_
+___Important:___ Before starting the measurement, close all instances of Chromium_
