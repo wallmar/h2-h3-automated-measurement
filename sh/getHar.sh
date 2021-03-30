@@ -6,9 +6,9 @@ fi
 
 # start Chromium
 if [ "$3" = '02' ]; then
-  chromium --disable-quic --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null --safebrowsing-disable-download-protection &
+  chromium --disable-quic --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null &
 else
-  chromium --enable-quic --quic-version=h3-29 --origin-to-force-quic-on="$1":443 --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null --safebrowsing-disable-download-protection &
+  chromium --enable-quic --quic-version=h3-29 --origin-to-force-quic-on="$1":443 --auto-open-devtools-for-tabs --disk-cache-dir=/dev/null &
 fi
 sleep 1
 
