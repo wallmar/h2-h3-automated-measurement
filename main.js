@@ -63,7 +63,7 @@ async function runForVersion(version, latency, loss) {
                 // Update results and sampleNumber
                 const sample = `sample-${padNumber(currentSample)}`
                 const loadTime = getLoadTime(harRaw)
-                console.log(`${getVersionName(version)} - ${sample}: ${loadTime}ms`)
+                console.log(`${getVersionName(version)} - ${sample}: ${loadTime}ms | Network: ${latency}ms ${loss}%`)
                 results.push({
                     loadTime,
                     requestCount,
