@@ -1,9 +1,9 @@
 exports.config = {
     downloadsPath: '/home/mwallner/Downloads',
     networkInterface: 'enp30s0',
-    samplesCount: 10,
+    samplesCount: 50,
     samplesDomain: 'mmtsample.hopto.org',
-    samplesStartWith: 50,
+    samplesStartWith: 0,
     serverNetworkInterface: 'enxa0cec83a9ce6',
     serverRootPassword: 'mmtsample'
 };
