@@ -71,7 +71,7 @@ async function runForVersion(version, latency, loss) {
                 })
                 currentSample++
 
-                if (currentSample < config.samplesCount) {
+                if (currentSample < config.samplesStartWith + config.samplesCount) {
                     // Generate HAR-File of next sample
                     await performMeasurementFor(currentSample, version)
                 }
@@ -106,7 +106,7 @@ async function runForVersion(version, latency, loss) {
     await execAwait(`./sh/setup.sh ${latency} ${loss} ${config.networkInterface} ${config.samplesDomain} ${config.serverRootPassword} ${config.serverNetworkInterface}`)
 
     let results = []
-    let currentSample = 0
+    let currentSample = config.samplesStartWith
 
     console.log('Removing all HAR-Files ...')
     try {
