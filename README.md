@@ -32,4 +32,4 @@ e.g. for with 100ms latency and 2 % loss (performed for HTTP/3 and HTTP/2)
 
 This creates entries in results.xlsx. If the file does not exist, it is created automatically. If a measurement is performed with the same parameters, the according entries in results.xlsx is replaced.
 
-___Important:___ Before starting the measurement, close all instances of Chromium_
+___Important:___ Before starting the measurement, close all instances of Chromium
