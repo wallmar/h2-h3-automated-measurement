@@ -14,9 +14,10 @@ Tool for automated performance measurement of h2 and h3 by Markus Wallner <mwall
   1. set the variable __downloadsPath__ to your Downloads-Location for Chromium.
   2. set the variable __networkInterface__ to your network interface (ip addr show)
   3. set the variable __samplesCount__ to the total count of samples provided by the webserver
-  3. set the variable __samplesDomain__ to the domain of the webserver
-  4. set the variable __serverNetworkInterface__ to the network interface of the webserver (ip addr show)
-  5. set the variable __serverRootPassword__ to the root password of the webserver (webserver must have enabled ssh and permit login as root - ___Please permit login as root only for the IP-Address of the client for security reasons___)
+  4. set the variable __samplesDomain__ to the domain of the webserver
+  5. set the variable __samplesStartWith__ to the number of the first sample (e.g. 50 will start with sample-50)
+  6. set the variable __serverNetworkInterface__ to the network interface of the webserver (ip addr show)
+  7. set the variable __serverRootPassword__ to the root password of the webserver (webserver must have enabled ssh and permit login as root - ___Please permit login as root only for the IP-Address of the client for security reasons___)
 * Add the Chrome Extension in ``/chrome-extension`` to Chromium (this enables auto-download of HAR):
   1. Open Chromium
   2. Go to __chrome://extensions/__
